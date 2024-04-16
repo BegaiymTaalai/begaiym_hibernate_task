@@ -18,7 +18,7 @@ public class UserDaoJdbcImpl implements UserDao {
 
     }
 
-    public void saveUser(User users) {
+    public void saveUser(String name, String lastName, byte age) {
 
     }
 
