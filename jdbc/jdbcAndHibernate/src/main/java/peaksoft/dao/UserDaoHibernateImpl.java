@@ -1,6 +1,8 @@
 package peaksoft.dao;
 
 import org.hibernate.*;
+import org.hibernate.query.Query;
+import org.hibernate.type.TrueFalseConverter;
 import peaksoft.model.User;
 import peaksoft.util.Util;
 
@@ -15,11 +17,10 @@ public class UserDaoHibernateImpl implements UserDao {
 
     @Override
     public void createUsersTable() {
+        SessionFactory sessionFactory = Util.sessionFactory();
         try {
-            SessionFactory sessionFactory = Util.sessionFactory();
             Session session = sessionFactory.openSession();
             session.beginTransaction();
-
             session.getTransaction().commit();
             session.close();
         } catch (Exception e) {
@@ -33,7 +34,7 @@ public class UserDaoHibernateImpl implements UserDao {
             SessionFactory sessionFactory = Util.sessionFactory();
             Session session = sessionFactory.openSession();
             session.beginTransaction();
-            session.createQuery("DROP User", User.class).getResultList();
+            session.createNativeQuery("DROP User", User.class).getResultList();
             session.getTransaction().commit();
             session.close();
         } catch (Exception e) {
@@ -47,11 +48,7 @@ public class UserDaoHibernateImpl implements UserDao {
         try {
             Session session = sessionFactory.openSession();
             session.beginTransaction();
-            User users = new User();
-            users.setName(name);
-            users.setLastName(lastName);
-            users.setAge((age));
-            session.persist(users);
+            session.persist(new User(name, lastName, age));
             session.getTransaction().commit();
             session.close();
         } catch (Exception e) {
@@ -65,7 +62,8 @@ public class UserDaoHibernateImpl implements UserDao {
             SessionFactory sessionFactory = Util.sessionFactory();
             Session session = sessionFactory.openSession();
             session.beginTransaction();
-            session.delete(id);
+            User user = session.get(User.class, id);
+            session.remove(user);
             session.getTransaction().commit();
         } catch (Exception e) {
             System.out.println(e.getMessage());
@@ -74,32 +72,26 @@ public class UserDaoHibernateImpl implements UserDao {
 
     @Override
     public List<User> getAllUsers() {
-        List<User> users = new ArrayList<>();
-        try {
-            SessionFactory sessionFactory = Util.sessionFactory();
-            Session session = sessionFactory.openSession();
-            session.beginTransaction();
-            users = session.createQuery("FROM User", User.class).getResultList();
-            session.getTransaction().commit();
-            session.close();
-        } catch (SessionException e) {
+        List<User> users = null;
+        try (Session session = Util.sessionFactory().openSession()) {
+            users = session.createNativeQuery("SELECT * FROM users", User.class).getResultList();
+        } catch (Exception e) {
             System.out.println(e.getMessage());
         }
         return users;
     }
 
-
     @Override
     public void cleanUsersTable() {
         try {
-            SessionFactory sessionFactory = Util.sessionFactory();
-            Session session = sessionFactory.openSession();
+            Session session = Util.sessionFactory().openSession();
             session.beginTransaction();
-            session.clear();
+            session.createNativeQuery(("DELETE FROM User"), User.class).executeUpdate();
             session.getTransaction().commit();
             session.close();
-        } catch (Exception e) {
+        } catch (HibernateException e) {
             System.out.println(e.getMessage());
         }
     }
 }
+

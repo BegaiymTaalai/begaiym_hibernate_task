@@ -7,7 +7,6 @@ public class Main {
     public static void main(String[] args) {
         UserDaoHibernateImpl userDaoHibernateImpl = new UserDaoHibernateImpl();
        // userDaoHibernateImpl.getAllUsers();
-        userDaoHibernateImpl.saveUser("Begai", "Taaliabekova", (byte) 20);
         // userDaoHibernateImpl.saveUser(new User("Aimeerim", "Zaripbek kyzy", (byte)21));
         //userDaoHibernateImpl.saveUser("User", "UserList", (byte)23);
         // userDaoHibernateImpl.saveUser("Test","TestList",(byte)45);
